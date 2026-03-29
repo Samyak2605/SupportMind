@@ -1,8 +1,8 @@
 # SupportMind
 
-SupportMind is a production-grade GenAI customer support copilot designed to answer real user queries using grounded Retrieval-Augmented Generation (RAG).
+SupportMind is a production-grade GenAI customer support copilot built using Retrieval-Augmented Generation (RAG), hybrid retrieval, and reranking to deliver grounded, citation-backed responses.
 
-It mimics how modern SaaS companies deploy internal AI assistants — combining retrieval systems, reranking, and LLM reasoning to generate accurate, citation-backed support responses.
+It reflects how modern AI systems are engineered in production — combining retrieval pipelines, ranking optimization, and LLM reasoning into a reliable, explainable support assistant.
 
 ---
 
@@ -29,6 +29,15 @@ SupportMind solves this by building a **grounded GenAI system** that:
 This ensures answers are **accurate, explainable, and production-safe**
 
 ---
+
+## Demo
+
+A working demo showcasing query → retrieval → grounded answer generation is included.
+
+
+https://github.com/user-attachments/assets/193999cd-1caa-4cf0-8e4d-04bf320097d1
+
+
 
 ## What Makes This Different
 
@@ -108,9 +117,6 @@ SupportMind/
 └── README.md
 ```
 
-## Core Features
-
----
 
 ## Core Capabilities
 
@@ -140,20 +146,6 @@ SupportMind/
 - Expose latency metrics
 - Compare retrieval strategies
 
----
-
-## Tech Stack
-
-- Backend: FastAPI
-- Frontend: Gradio
-- Vector Store: ChromaDB
-- Embeddings: BAAI/bge-small-en-v1.5
-- Reranker: cross-encoder/ms-marco-MiniLM-L-6-v2
-- LLM: Groq (llama-3.1-8b-instant)
-- Evaluation: RAGAS
-- Data Processing: pandas
-
----
 
 ## Dataset
 
@@ -167,15 +159,17 @@ SupportMind/
 ---
 
 ## Data Processing
+
 - Combine:
+
 ```text
 instruction + response
 ```
-- Remove null / noisy rows
+- Remove null and noisy rows
 - Chunking:
-- size = 300
-- overlap = 50
-- Store metadata:
+- chunk_size = 300
+- chunk_overlap = 50
+- Metadata stored:
 - intent
 - category
 
@@ -310,6 +304,12 @@ Expected product behaviors:
 - latency metrics expose system timing
 - retrieval mode changes can be inspected directly
 
+## Scalability Considerations
+
+- Vector store can be replaced with FAISS / Pinecone for production-scale deployment
+- Retrieval pipeline supports batching for large datasets
+- Modular architecture allows easy swapping of embedding models and LLM providers
+- API layer is stateless and deployable using Docker / Kubernetes
 
 ## License
 
