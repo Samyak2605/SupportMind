@@ -32,8 +32,12 @@ This ensures answers are **accurate, explainable, and production-safe**
 
 ## Demo
 
-A working demo showcasing query → retrieval → grounded answer generation is included.
+A full working demo is included showcasing:
 
+- grounded response generation with citations
+- hybrid vs semantic retrieval comparison
+- reranker impact on answer quality
+- latency breakdown across retrieval, reranking, and generation
 
 https://github.com/user-attachments/assets/193999cd-1caa-4cf0-8e4d-04bf320097d1
 
@@ -167,11 +171,11 @@ instruction + response
 ```
 - Remove null and noisy rows
 - Chunking:
-- chunk_size = 300
-- chunk_overlap = 50
+  - chunk_size = 300
+  - chunk_overlap = 50
 - Metadata stored:
-- intent
-- category
+  - intent
+  - category
 
 ---
 
