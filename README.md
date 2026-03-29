@@ -1,70 +1,68 @@
 # SupportMind
 
-**SupportMind** is a production-style GenAI customer support copilot built end to end with Retrieval-Augmented Generation (RAG), hybrid retrieval, reranking, grounded answer generation, API serving, UI delivery, and evaluation.
+SupportMind is a production-grade GenAI customer support copilot designed to answer real user queries using grounded Retrieval-Augmented Generation (RAG).
 
-It is designed to look and behave like a real internal AI support assistant used by a SaaS company: customer query in, grounded support response out, with citations, retrieved evidence, latency breakdowns, and measurable retrieval quality.
+It mimics how modern SaaS companies deploy internal AI assistants — combining retrieval systems, reranking, and LLM reasoning to generate accurate, citation-backed support responses.
 
-## Why This Project Stands Out
+---
 
-- Built as a full-stack AI product, not just a notebook or toy demo
-- Uses a real retrieval stack: semantic search + BM25 + hybrid RRF + cross-encoder reranking
-- Adds grounded generation with source citations and hallucination control
-- Ships with both a FastAPI backend and a Gradio frontend
-- Includes evaluation using RAGAS across multiple retrieval strategies
-- Structured like a maintainable production codebase with modular components, config-driven setup, and logging
+## Problem
 
-This project demonstrates practical AI engineering across:
+Customer support systems today struggle with:
 
-- LLM application design
-- retrieval systems
-- API engineering
-- product-facing UI
-- evaluation and benchmarking
-- production-style code organization
+- scattered knowledge across FAQs and documentation
+- inconsistent agent responses
+- hallucinations from naive LLM-based chatbots
+- lack of traceability in generated answers
 
-## Product Overview
+---
 
-SupportMind helps answer customer support questions by retrieving relevant support knowledge from a local support dataset and generating a grounded answer using only retrieved evidence.
+## Solution
 
-**User flow**
+SupportMind solves this by building a **grounded GenAI system** that:
 
-1. A user asks a support question like `How do I cancel my order?`
-2. The system retrieves relevant support knowledge from the indexed knowledge base
-3. Results are reranked using a cross-encoder
-4. The LLM generates a grounded answer using the top evidence
-5. The system returns:
-   - final answer
-   - retrieved evidence
-   - source citations
-   - retrieval / rerank / generation latency
+- retrieves relevant support knowledge using hybrid search
+- reranks results for precision
+- generates answers strictly based on retrieved evidence
+- provides citations and system-level observability
 
-## Architecture
+This ensures answers are **accurate, explainable, and production-safe**
+
+---
+
+## What Makes This Different
+
+This is not a chatbot wrapper.
+
+This is a **full retrieval system + LLM application stack**, including:
+
+- hybrid retrieval (semantic + keyword)
+- ranking optimization (RRF + cross-encoder)
+- grounded generation with hallucination control
+- evaluation using RAGAS
+- API + UI delivery
+- modular, production-style architecture
+
+---
+
+## System Architecture
 
 ```text
 User Query
-   |
-   v
-FastAPI / Gradio
-   |
-   v
-Retrieval Layer
-   |- Semantic Search (Chroma + BGE embeddings)
-   |- BM25 Keyword Search
-   |- Hybrid Fusion (RRF)
-   |- Cross-Encoder Reranker
-   |
-   v
-Grounded Generation Layer
-   |- Groq LLM (llama-3.1-8b-instant)
-   |- Citation-aware prompting
-   |- Placeholder-aware sanitization
-   |
-   v
-Response
-   |- Answer
-   |- Citations
-   |- Retrieved chunks
-   |- Latency metrics
+→
+API / UI Layer
+→
+Retrieval System
+├─ Semantic Search (Embeddings + ChromaDB)
+├─ BM25 Keyword Search
+├─ Hybrid Fusion (RRF)
+├─ Cross-Encoder Reranking
+→
+Context Selection
+→
+LLM Generation (Groq - LLaMA 3)
+→
+Grounded Response + Citations + Metrics
 ```
 
 ## Tech Stack
@@ -112,88 +110,120 @@ SupportMind/
 
 ## Core Features
 
-### 1. Data Ingestion
+---
 
-- Loads `data/raw/bitext_support.csv` using pandas
-- Drops null rows
-- Uses:
-  - `instruction` as query text
-  - `response` as support knowledge
-- Combines `instruction + response` into a single retrieval document
+## Core Capabilities
 
-### 2. Chunking
+### Hybrid Retrieval Engine
 
-- Uses `RecursiveCharacterTextSplitter`
-- `chunk_size = 300`
-- `chunk_overlap = 50`
+- Embedding-based semantic search
+- BM25 keyword recall
+- Reciprocal Rank Fusion (RRF)
+- Cross-encoder reranking for precision
 
-### 3. Retrieval
+---
 
-- **Semantic search** over BGE embeddings stored in ChromaDB
-- **BM25 search** for keyword-sensitive recall
-- **Hybrid retrieval** using Reciprocal Rank Fusion
-- **Cross-encoder reranking** for final ranking quality
-- Deduplication and intent-aware filtering to reduce noisy results
+### Grounded Answer Generation
 
-### 4. Grounded Generation
+- Uses Groq (`llama-3.1-8b-instant`)
+- Strict grounding (no external hallucination)
+- Citation-aware responses
+- Context filtering for relevance
 
-- Uses Groq-hosted `llama-3.1-8b-instant`
-- Prompting enforces:
-  - grounded answers only
-  - source-aware answering
-  - citation output
-  - irrelevant context suppression
-- Placeholder-aware sanitization improves customer-facing readability
+---
 
-### 5. API
+### Support Intelligence
 
-- FastAPI backend with:
-  - `GET /health`
-  - `POST /query`
-- Returns:
-  - answer
-  - citations
-  - retrieved chunks
-  - latency metrics
+- Answer real customer queries
+- Show retrieved evidence
+- Provide source attribution
+- Expose latency metrics
+- Compare retrieval strategies
 
-### 6. UI
+---
 
-- Gradio app for interactive testing
-- Supports:
-  - support query input
-  - semantic vs hybrid mode toggle
-  - reranker toggle
-  - grounded answer output
-  - retrieved chunks viewer
-  - citations
-  - latency metrics
+## Tech Stack
 
-### 7. Evaluation
+- Backend: FastAPI
+- Frontend: Gradio
+- Vector Store: ChromaDB
+- Embeddings: BAAI/bge-small-en-v1.5
+- Reranker: cross-encoder/ms-marco-MiniLM-L-6-v2
+- LLM: Groq (llama-3.1-8b-instant)
+- Evaluation: RAGAS
+- Data Processing: pandas
 
-- Evaluation dataset generation from the source corpus
-- RAGAS metrics:
-  - faithfulness
-  - answer_relevance
-  - context_precision
-  - context_recall
-- Comparison modes:
-  - semantic only
-  - hybrid
-  - hybrid + rerank
+---
 
-## What I Optimized For
+## Dataset
 
-This project was intentionally engineered to reflect how a serious AI application would be built in practice:
+- Source: Bitext Customer Support Dataset
+- Size: ~27K rows
+- Fields:
+  - instruction (user query)
+  - response (support answer)
+  - intent / category
 
-- modular architecture
-- reusable services
-- config-driven behavior
-- logging over print debugging
-- retrieval quality improvements over naive vector search
-- latency visibility
-- measurable evaluation rather than subjective demos only
+---
 
-In other words: this is not just “LLM wrapper code”; it is a retrieval system, application backend, frontend, and evaluation pipeline packaged as a deployable AI product.
+## Data Processing
+- Combine:
+```text
+instruction + response
+```
+- Remove null / noisy rows
+- Chunking:
+- size = 300
+- overlap = 50
+- Store metadata:
+- intent
+- category
+
+---
+
+## API
+
+- `GET /health`
+- `POST /query`
+
+Returns:
+
+- generated answer
+- citations
+- retrieved chunks
+- latency breakdown
+
+---
+
+## UI
+
+Interactive Gradio interface:
+
+- query input
+- hybrid / semantic toggle
+- reranker toggle
+- answer + citations
+- retrieved context viewer
+- latency metrics
+
+---
+
+## Evaluation
+
+RAGAS-based evaluation pipeline:
+
+- faithfulness
+- answer_relevance
+- context_precision
+- context_recall
+
+Compare:
+
+- semantic retrieval
+- hybrid retrieval
+- hybrid + rerank
+
+---
 
 ## Local Run Guide
 
@@ -280,27 +310,6 @@ Expected product behaviors:
 - latency metrics expose system timing
 - retrieval mode changes can be inspected directly
 
-## Recruiter Notes
-
-If you are reviewing this project as a hiring manager or recruiter, the key signal here is breadth plus implementation depth.
-
-This project demonstrates that I can:
-
-- design and build LLM applications beyond simple prompting
-- engineer retrieval systems that combine recall and precision techniques
-- connect model systems to usable product interfaces
-- evaluate AI quality systematically
-- structure AI projects like maintainable software, not just experiments
-
-This is the kind of project I’d build when the goal is not only to “make the model answer,” but to make the system observable, explainable, testable, and presentable.
-
-## Future Improvements
-
-- stronger response normalization for template-heavy datasets
-- improved deduplication across semantically identical support responses
-- structured tracing and metrics export
-- auth, rate limiting, and deployment packaging
-- richer evaluation dashboards
 
 ## License
 
