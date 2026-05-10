@@ -1,0 +1,12 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+data/processed/*.jsonl
+data/vectorstore/supportmind/*
+!data/vectorstore/supportmind/.gitkeep
+logs/
+dist/
+build/
