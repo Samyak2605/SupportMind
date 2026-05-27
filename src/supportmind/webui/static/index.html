@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SupportMind</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237c6cf6'/%3E%3Cpath d='M10 20c0-4 3-7 6-7s6 2 6 5-3 4-6 4c-1.2 0-2.3-.2-3.2-.6' stroke='white' stroke-width='2.2' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='11.5' cy='13' r='1.4' fill='white'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#g)"/><path d="M10 20c0-4 3-7 6-7s6 2 6 5-3 4-6 4c-1.2 0-2.3-.2-3.2-.6" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="11.5" cy="13" r="1.4" fill="white"/><defs><linearGradient id="g" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#7c6cf6"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs></svg>
+        </span>
+        <span class="brand-name">SupportMind</span>
+        <span class="brand-tag">RAG copilot + resolution agent</span>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Primary">
+        <button class="tab-btn is-active" data-tab="ask" role="tab" aria-selected="true">Ask</button>
+        <button class="tab-btn" data-tab="resolve" role="tab" aria-selected="false">Resolve</button>
+      </nav>
+      <div class="status-pill" id="statusPill">
+        <span class="dot"></span> live
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- ASK TAB -->
+      <section class="panel is-active" id="tab-ask" role="tabpanel">
+        <div class="grid-ask">
+          <div class="card composer">
+            <label class="field-label" for="askInput">Support question</label>
+            <textarea id="askInput" rows="4" placeholder="How do I cancel my order if it hasn't shipped yet?"></textarea>
+
+            <div class="row-controls">
+              <div class="segmented" id="modeSegment" data-value="hybrid">
+                <button data-value="semantic">Semantic</button>
+                <button data-value="hybrid" class="is-active">Hybrid</button>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="rerankerToggle" checked />
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+                <span class="switch-label">Reranker</span>
+              </label>
+            </div>
+
+            <button class="btn btn-primary" id="askSubmit">
+              <span class="btn-label">Ask SupportMind</span>
+              <span class="spinner" hidden></span>
+            </button>
+            <p class="hint">Try: <em>"How do I reset my password?"</em> or <em>"How do I unsubscribe from the newsletter?"</em></p>
+          </div>
+
+          <div class="card answer-card" id="askEmpty">
+            <div class="empty-state">
+              <div class="empty-glyph">✦</div>
+              <p>Ask a question to see a grounded answer with citations, retrieved evidence, and a latency breakdown.</p>
+            </div>
+          </div>
+
+          <div class="card answer-card" id="askResult" hidden>
+            <h3 class="section-title">Answer</h3>
+            <p class="answer-text" id="answerText"></p>
+
+            <div class="stat-row" id="latencyStats"></div>
+
+            <h4 class="section-subtitle">Citations</h4>
+            <div class="chip-row" id="citationChips"></div>
+
+            <details class="chunks-details">
+              <summary>Retrieved chunks</summary>
+              <div id="retrievedChunks" class="chunk-list"></div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESOLVE TAB -->
+      <section class="panel" id="tab-resolve" role="tabpanel">
+        <div class="grid-resolve">
+          <div class="card chat-card">
+            <div class="chat-header">
+              <div>
+                <h3 class="section-title">Resolution agent</h3>
+                <p class="muted">Order status &middot; cancellations &middot; refunds (with human approval above the cap) &middot; escalation</p>
+              </div>
+              <button class="btn btn-ghost" id="newConversation">New conversation</button>
+            </div>
+            <div class="chat-window" id="chatWindow">
+              <div class="chat-empty" id="chatEmptyState">
+                <div class="empty-glyph">💬</div>
+                <p>Try: <em>"Refund order 1, it arrived damaged"</em> or <em>"Cancel order 5"</em></p>
+              </div>
+            </div>
+            <form class="chat-input-row" id="chatForm">
+              <input type="text" id="chatInput" placeholder="Message the agent&hellip;" autocomplete="off" />
+              <button type="submit" class="btn btn-primary" id="chatSend">
+                <span class="btn-label">Send</span>
+                <span class="spinner" hidden></span>
+              </button>
+            </form>
+          </div>
+
+          <div class="card approvals-card">
+            <div class="approvals-header">
+              <h3 class="section-title">Pending approvals</h3>
+              <button class="btn btn-ghost btn-sm" id="refreshApprovals">Refresh</button>
+            </div>
+            <div id="approvalsList" class="approvals-list">
+              <p class="muted approvals-empty">No pending approvals.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>SupportMind &middot; hybrid RAG + LangGraph resolution agent</span>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
