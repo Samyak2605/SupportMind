@@ -7,6 +7,11 @@ __pycache__/
 data/processed/*.jsonl
 data/vectorstore/supportmind/*
 !data/vectorstore/supportmind/.gitkeep
+data/orders.db
+data/orders.db-*
+data/checkpoints.db
+data/checkpoints.db-*
+data/llm_cache.json
 logs/
 dist/
 build/
