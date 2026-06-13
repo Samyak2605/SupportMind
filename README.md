@@ -6,8 +6,13 @@ reranking, with citations) with a **LangGraph resolution agent** that looks up o
 processes refunds — with a human-approval gate above a configurable dollar amount, durable across a
 process restart — and escalates to a human when it can't resolve something safely.
 
-- **Live demo:** `TODO — paste the Render URL here after deploying (see "Deploying" below)`
-- **Demo video:** `TODO — paste a 2-minute walkthrough link here`
+- **Demo video (v2, agent + HITL approvals):** [watch here](https://github.com/Samyak2605/SupportMind/releases/download/demo-v2/Screen.Recording.2026-07-13.at.2.53.41.PM.mov)
+- *(an earlier [v1 RAG-only demo video](https://github.com/user-attachments/assets/193999cd-1caa-4cf0-8e4d-04bf320097d1) exists from before the agent layer was added)*
+- **Live demo:** not deployed — Render's free tier caps web services at 512MB RAM, and this project's
+  retrieval stack (sentence-transformer embeddings + cross-encoder reranker + a 122k-chunk index)
+  exceeds that loading into memory (`Ran out of memory (used over 512MB)` per Render's own build log).
+  Paying for a bigger instance for a portfolio project didn't seem worth it — the demo video above shows
+  the exact same system running against the same code. See [Limitations](#limitations).
 - **CI:** ![CI](https://github.com/Samyak2605/SupportMind/actions/workflows/ci.yml/badge.svg)
 
 ## Results at a glance
@@ -185,8 +190,10 @@ curl -X POST http://127.0.0.1:8000/approvals/<approval_id> -H "Content-Type: app
 3. Set the `GROQ_API_KEY` and `GEMINI_API_KEY` environment variables in the Render dashboard (marked
    `sync: false` in `render.yaml` so Render prompts for them rather than committing secrets).
 
-Cold builds bake the full retrieval index (~10 minutes) — see [Limitations](#limitations) for the
-free-tier build-timeout and ephemeral-disk tradeoffs this implies.
+**Note:** the build succeeds, but the service currently fails to *start* on Render's free plan —
+it exceeds the 512MB RAM cap loading the embedding + reranker models and the index. See
+[Limitations](#limitations) for the measured cause and what a real fix would involve (bigger instance,
+smaller/quantized models, or lazy-loading). This repo's live demo is the recorded walkthrough instead.
 
 ## Design Decisions
 
@@ -259,8 +266,14 @@ not an LLM's opinion). The one failure, from [`results/agent_eval.md`](results/a
   rather than three complete ones — see the note under Results at a glance. The live agent demo itself
   uses far less volume per request and is unaffected in normal use; a sustained high-traffic demo could
   still hit the same wall on a free-tier key.
-- **Cold Render builds are slow** (the retrieval index is baked at Docker build time, ~10 minutes) and
-  free-tier cold starts after inactivity add further latency — noted honestly rather than hidden.
+- **Not deployed to Render**: the free tier's 512MB RAM cap is exceeded by the retrieval stack
+  (embeddings + reranker + torch + a 122k-chunk index) at container startup — confirmed by Render's own
+  build log (`Ran out of memory (used over 512MB)`), not a hypothetical. Fixing this for real would mean
+  a smaller/quantized embedding model, lazy-loading the reranker, or simply paying for more RAM — a
+  reasonable next step for production, not justified for a portfolio demo. The demo video shows the
+  identical system running locally against the same code and config.
+- **Cold Docker builds are slow** (the retrieval index is baked at build time, ~10 minutes) — true
+  regardless of where it's hosted, noted honestly rather than hidden.
 - **No authentication** on `/chat`, `/approvals`, or the web UI — anyone with the URL can approve
   refunds. Acceptable for a portfolio demo; not for production.
 - **The reranker/retrieval stack was extended, not rewritten**, per the project's own ground rules — so
