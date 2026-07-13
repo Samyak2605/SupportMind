@@ -2,11 +2,24 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sys
+import types
 from statistics import mean
 
 import pandas as pd
 from datasets import Dataset
 from langchain_groq import ChatGroq
+
+# ragas==0.2.14's ragas/llms/base.py unconditionally imports ChatVertexAI from
+# langchain_community.chat_models.vertexai, a submodule removed in current
+# langchain-community (superseded by the standalone langchain-google-vertexai
+# package). We never use Vertex AI (Groq only), so a stub satisfies the
+# import without pulling in an unrelated Google Cloud dependency.
+if "langchain_community.chat_models.vertexai" not in sys.modules:
+    _vertexai_stub = types.ModuleType("langchain_community.chat_models.vertexai")
+    _vertexai_stub.ChatVertexAI = type("ChatVertexAI", (), {})
+    sys.modules["langchain_community.chat_models.vertexai"] = _vertexai_stub
+
 from ragas import evaluate
 from ragas.embeddings.base import BaseRagasEmbeddings
 from ragas.llms import LangchainLLMWrapper
