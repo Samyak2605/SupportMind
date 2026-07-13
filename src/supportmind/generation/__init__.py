@@ -131,9 +131,9 @@ class GroqGenerationService:
 
 
 class SupportMindService:
-    def __init__(self, config: SupportMindConfig, settings: EnvironmentSettings):
+    def __init__(self, config: SupportMindConfig, settings: EnvironmentSettings, retrieval_service: RetrievalService | None = None):
         self.config = config
-        self.retrieval = RetrievalService(config)
+        self.retrieval = retrieval_service or RetrievalService(config)
         self.generator = GroqGenerationService(config, settings)
 
     def answer(self, request: QueryRequest) -> QueryResponse:

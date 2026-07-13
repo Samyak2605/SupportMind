@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint (ruff)
+        run: ruff check src tests evals scripts
+
+      - name: Seed a scratch orders DB
+        env:
+          SUPPORTMIND_CONFIG_PATH: config/supportmind.yaml
+        run: PYTHONPATH=src python scripts/seed_orders.py
+
+      - name: Run deterministic test suite
+        env:
+          # Agent graph tests inject a FakeLLMClient and never call Groq/Gemini,
+          # so no API keys are needed here. Tests marked `requires_index` need
+          # the ~230MB retrieval index built (sentence-transformers download +
+          # embed 122k chunks, several minutes) and are excluded from CI for
+          # speed; they run locally. The full 30-scenario live eval (real Groq
+          # + Gemini) also runs locally via scripts/run_agent_evals.py and its
+          # results are committed, not regenerated in CI.
+          SUPPORTMIND_CONFIG_PATH: config/supportmind.yaml
+        run: PYTHONPATH=src python -m pytest tests/ -m "not requires_index" -q
