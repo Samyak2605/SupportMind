@@ -7,7 +7,8 @@ processes refunds — with a human-approval gate above a configurable dollar amo
 process restart — and escalates to a human when it can't resolve something safely.
 
 - **Live demo:** `TODO — paste the Render URL here after deploying (see "Deploying" below)`
-- **Demo video:** `TODO — paste a 2-minute walkthrough link here`
+- **Demo video (v2, agent + HITL approvals):** `TODO — paste a walkthrough link here`
+- *(an earlier [v1 RAG-only demo video](https://github.com/user-attachments/assets/193999cd-1caa-4cf0-8e4d-04bf320097d1) exists from before the agent layer was added)*
 - **CI:** ![CI](https://github.com/Samyak2605/SupportMind/actions/workflows/ci.yml/badge.svg)
 
 ## Results at a glance
